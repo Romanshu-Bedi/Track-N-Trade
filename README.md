@@ -1,7 +1,7 @@
 # Track-N-Trade
 
-#TracknTrade
-*TracknTrade is a web application designed for trading enthusiasts. The frontend is built with React and Vite, while the backend uses Node.js and Express.
+# TracknTrade
+* TracknTrade is a web application designed for trading enthusiasts. The frontend is built with React and Vite, while the backend uses Node.js and Express.
 
 Getting Started
 Prerequisites
