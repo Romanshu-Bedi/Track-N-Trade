@@ -1,14 +1,12 @@
-import { SignIn } from '@clerk/clerk-react';
-import React from 'react';
-import './index.css'
+import { SignIn } from '@clerk/clerk-react'
+import React from 'react'
 
 function SignInPage() {
   return (
-    <div className="flex justify-center items-center h-screen background-image">
-  <SignIn />
-</div>
-
-  );
+    <div className='flex justify-center my-20 items-center'>
+      <SignIn/>
+    </div>
+  )
 }
 
-export default SignInPage;
+export default SignInPage
