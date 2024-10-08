@@ -10,7 +10,7 @@
 
 * bash
 * Copy code
-* git clone https://github.com/yourusername/trackntrade.git
+* git clone https://github.com/Anhad928/trackntrade.git
 * cd trackntrade
 # Frontend Setup:
 
