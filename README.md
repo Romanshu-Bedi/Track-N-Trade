@@ -36,3 +36,4 @@
 # Notes
 * Ensure auth.png is in the public directory of the frontend for the background image.
 * Modify the Clerk frontend API key in ClerkProvider as needed.
+*  
