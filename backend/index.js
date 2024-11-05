@@ -2,11 +2,13 @@
 const express = require('express');
 const { Webhook } = require('svix');
 const dotenv = require('dotenv');
+const cors = require('cors');
 const { Pool } = require('pg');
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
+app.use(cors());
 const signingSecret = process.env.CLERK_SIGNING_SECRET;
 
 const pool = new Pool({
@@ -84,18 +86,43 @@ app.get('/api/inventory', (req, res) => {
 });
 
 // Add a new inventory item
-app.post('/api/inventory', (req, res) => {
-  const { name, sku, price, quantity, category_id, supplier } = req.body;
-  pool.query(
-    'INSERT INTO inventory (name, sku, price, quantity, category_id, supplier) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [name, sku, price, quantity, category_id, supplier]
-  )
-    .then(result => res.json(result.rows[0]))
-    .catch(error => {
-      console.error('Error adding inventory item:', error);
-      res.status(500).send('Error adding inventory item');
-    });
+app.post('/api/inventory', async (req, res) => {
+  const { name, sku, price, quantity, category, supplier } = req.body;
+
+  if (!name || !sku || !price || !quantity || !category || !supplier) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  try {
+    // Check if category exists; if not, create it
+    let categoryId;
+    const categoryResult = await pool.query('SELECT * FROM categories WHERE name = $1', [category]);
+    if (categoryResult.rows.length > 0) {
+      // Category exists
+      categoryId = categoryResult.rows[0].category_id;
+    } else {
+      // Category does not exist, so create it
+      const newCategoryResult = await pool.query(
+        'INSERT INTO categories (name) VALUES ($1) RETURNING category_id',
+        [category]
+      );
+      categoryId = newCategoryResult.rows[0].category_id;
+    }
+
+    // Insert the inventory item with the category ID
+    const result = await pool.query(
+      'INSERT INTO inventory (name, sku, price, quantity, category_id, supplier) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [name, sku, price, quantity, categoryId, supplier]
+    );
+
+    res.json({ success: true, item: result.rows[0] });
+  } catch (error) {
+    console.error('Error adding inventory item:', error);
+    res.status(500).json({ error: 'Error adding inventory item' });
+  }
 });
+
+
 
 // Get all sales records
 app.get('/api/sales', (req, res) => {
