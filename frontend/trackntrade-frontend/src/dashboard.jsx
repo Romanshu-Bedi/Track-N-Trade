@@ -5,10 +5,15 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
+  const { user } = useUser();
+  const clerkId = user?.id;
+  const [userId, setUserId] = useState(null);
   const [timeRange, setTimeRange] = useState('30days');
   const [dueDate, setDueDate] = useState(null);
   const [inventoryData, setInventoryData] = useState([]);
@@ -16,16 +21,44 @@ function Dashboard() {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/api/user-id?clerk_id=${clerkId}`);
+        const data = await response.json();
+        if (response.ok) {
+          setUserId(data.user_id);
+        } else {
+          console.error('Failed to fetch user ID:', data.error);
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+
+    if (clerkId) {
+      fetchUserId();
+    }
+  }, [clerkId]);
+  
+
   const fetchData = async () => {
     try {
-      const categoryResponse = await fetch('http://localhost:3001/api/categories');
+      // Check if userId is available
+      if (!userId) {
+        console.error('User ID is not available');
+        return;
+      }
+
+      const categoryResponse = await fetch(`http://localhost:3001/api/categories?user_id=${userId}`);
       const categories = await categoryResponse.json();
-      
-      const inventoryResponse = await fetch('http://localhost:3001/api/inventory');
+
+      const inventoryResponse = await fetch(`http://localhost:3001/api/inventory?user_id=${userId}`);
       const inventory = await inventoryResponse.json();
       setInventoryData(inventory);
 
-      const salesResponse = await fetch('http://localhost:3001/api/sales');
+      const salesResponse = await fetch(`http://localhost:3001/api/sales?user_id=${userId}`);
       const sales = await salesResponse.json();
 
       // Calculate total sales per category
@@ -43,13 +76,13 @@ function Dashboard() {
       setSalesData(categorySales);
     } catch (error) {
       console.error('Error fetching data:', error);
-      alert('Failed to fetch data. Please check your server.');
+      // alert('Failed to fetch data. Please check your server.');
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [userId]); // Re-fetch data if userId changes
 
   const handleTimeRangeChange = (event) => {
     setTimeRange(event.target.value);
@@ -123,7 +156,7 @@ function Dashboard() {
 
       <div className="dashboard-actions">
         <button className="action-button"onClick={() => navigate('/add-item')}>Add Inventory</button>
-        <button className="action-button">Add Sales</button>
+        <button className="action-button"onClick={() => navigate('/add-sale')}>Add Sales</button>
       </div>
     </div>
   );
