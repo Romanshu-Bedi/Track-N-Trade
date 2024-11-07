@@ -36,3 +36,12 @@
 # Notes
 * Ensure auth.png is in the public directory of the frontend for the background image.
 * Modify the Clerk frontend API key in ClerkProvider as needed.
+
+# To Delete Migrations from Database
+ * npx knex migrate:rollback --all
+# To Add the Migrations to Database
+  * npx knex migrate:latest
+
+
+# For Changes in .env file we have to 
+* Update the database url and with your name of device for that run command 'whoami' and change the password to in .env file
