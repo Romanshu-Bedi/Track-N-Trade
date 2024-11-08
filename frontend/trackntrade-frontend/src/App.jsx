@@ -8,6 +8,7 @@ import SignInPage from './auth/sign-in/index';
 import Dashboard from './dashboard';
 import AddItemForm from './AddItemForm';
 import AddSaleForm from './AddSaleForm';
+import BalanceSheet from './BalanceSheet';
 
 function App() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -46,6 +47,7 @@ function App() {
         <Route path="/dashboard" element={isSignedIn ? <Dashboard /> : <Navigate to="/auth/sign-in" />} />
         <Route path="/add-item" element={isSignedIn && userId ? <AddItemForm userId={userId} /> : <Navigate to="/auth/sign-in" />} />
         <Route path="/add-sale" element={isSignedIn && userId ? <AddSaleForm userId={userId} /> : <Navigate to="/auth/sign-in" />} />
+        <Route path="/balance-sheet" element={isSignedIn && userId ? <BalanceSheet userId={userId} /> : <Navigate to="/auth/sign-in" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

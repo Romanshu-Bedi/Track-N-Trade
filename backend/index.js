@@ -95,7 +95,6 @@ app.get('/api/user-id', async (req, res) => {
   }
 });  
 
-
 // Categories Endpoints
 app.get('/api/categories', (req, res) => {
   const { user_id } = req.query;

@@ -29,6 +29,7 @@ function Dashboard() {
         const data = await response.json();
         if (response.ok) {
           setUserId(data.user_id);
+          console.log('user_id:', userId);
         } else {
           console.error('Failed to fetch user ID:', data.error);
         }
@@ -39,10 +40,12 @@ function Dashboard() {
 
     if (clerkId) {
       fetchUserId();
+      console.log('clerkId:', clerkId); 
+      console.log('userId:', userId);
     }
   }, [clerkId]);
   
-
+  
   const fetchData = async () => {
     try {
       // Check if userId is available
@@ -157,6 +160,7 @@ function Dashboard() {
       <div className="dashboard-actions">
         <button className="action-button"onClick={() => navigate('/add-item')}>Add Inventory</button>
         <button className="action-button"onClick={() => navigate('/add-sale')}>Add Sales</button>
+        <button className="action-button"onClick={() => navigate('/balance-sheet')}>Generate Balance sheet</button>
       </div>
     </div>
   );
