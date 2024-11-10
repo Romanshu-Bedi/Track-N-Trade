@@ -1,8 +1,10 @@
+// App.jsx
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { useState, useEffect } from 'react';
 import Header from './custom/Header';
+import Layout from './custom/Layout';
 import LandingPage from './LandingPage';
 import SignInPage from './auth/sign-in/index';
 import Dashboard from './dashboard';
@@ -13,6 +15,9 @@ import BalanceSheet from './BalanceSheet';
 function App() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [userId, setUserId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -40,14 +45,19 @@ function App() {
 
   return (
     <Router>
-      <Header />
+      <Header toggleSidebar={toggleSidebar} />
       <Routes>
         <Route path="/" element={isSignedIn ? <Navigate to="/dashboard" /> : <LandingPage />} />
         <Route path="/auth/sign-in" element={<SignInPage />} />
-        <Route path="/dashboard" element={isSignedIn ? <Dashboard /> : <Navigate to="/auth/sign-in" />} />
-        <Route path="/add-item" element={isSignedIn && userId ? <AddItemForm userId={userId} /> : <Navigate to="/auth/sign-in" />} />
-        <Route path="/add-sale" element={isSignedIn && userId ? <AddSaleForm userId={userId} /> : <Navigate to="/auth/sign-in" />} />
-        <Route path="/balance-sheet" element={isSignedIn && userId ? <BalanceSheet userId={userId} /> : <Navigate to="/auth/sign-in" />} />
+        
+        {/* Routes with Sidebar Layout */}
+        <Route element={isSignedIn ? <Layout isSidebarOpen={isSidebarOpen} /> : <Navigate to="/auth/sign-in" />}>
+          <Route path="/dashboard" element={<Dashboard toggleSidebar={toggleSidebar} />} />
+          <Route path="/add-item" element={userId ? <AddItemForm userId={userId} /> : <Navigate to="/auth/sign-in" />} />
+          <Route path="/add-sale" element={userId ? <AddSaleForm userId={userId} /> : <Navigate to="/auth/sign-in" />} />
+          <Route path="/balance-sheet" element={userId ? <BalanceSheet userId={userId} /> : <Navigate to="/auth/sign-in" />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

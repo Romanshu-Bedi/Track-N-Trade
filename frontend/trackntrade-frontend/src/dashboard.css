@@ -170,3 +170,9 @@
   .action-button:hover {
     background-color: #0056b3;
   }
+
+  /* Dashboard content adjustment */
+.dashboard-content-wrapper {
+  margin-left: 200px; /* Match sidebar width */
+  padding: 20px;
+}

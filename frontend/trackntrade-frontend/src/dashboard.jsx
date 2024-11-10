@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import './Dashboard.css';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -7,10 +8,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 
-
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function Dashboard() {
+function Dashboard({ toggleSidebar }) {
   const { user } = useUser();
   const clerkId = user?.id;
   const [userId, setUserId] = useState(null);
@@ -21,7 +21,6 @@ function Dashboard() {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -29,7 +28,6 @@ function Dashboard() {
         const data = await response.json();
         if (response.ok) {
           setUserId(data.user_id);
-          console.log('user_id:', userId);
         } else {
           console.error('Failed to fetch user ID:', data.error);
         }
@@ -40,15 +38,11 @@ function Dashboard() {
 
     if (clerkId) {
       fetchUserId();
-      console.log('clerkId:', clerkId); 
-      console.log('userId:', userId);
     }
   }, [clerkId]);
-  
-  
+
   const fetchData = async () => {
     try {
-      // Check if userId is available
       if (!userId) {
         console.error('User ID is not available');
         return;
@@ -64,7 +58,6 @@ function Dashboard() {
       const salesResponse = await fetch(`http://localhost:3001/api/sales?user_id=${userId}`);
       const sales = await salesResponse.json();
 
-      // Calculate total sales per category
       const categorySales = categories.map(category => {
         const itemsInCategory = inventory.filter(item => item.category_id === category.category_id);
         const totalSales = itemsInCategory.reduce((sum, item) => {
@@ -79,13 +72,12 @@ function Dashboard() {
       setSalesData(categorySales);
     } catch (error) {
       console.error('Error fetching data:', error);
-      // alert('Failed to fetch data. Please check your server.');
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, [userId]); // Re-fetch data if userId changes
+  }, [userId]);
 
   const handleTimeRangeChange = (event) => {
     setTimeRange(event.target.value);
@@ -103,12 +95,15 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard">
+    <div className="dashboard-content-wrapper">
       <header className="dashboard-header">
+        <button onClick={toggleSidebar} className="sidebar-toggle-button">
+          ☰
+        </button>
         <div className="logo">TrackNTrade</div>
         <div className="dashboard-title">DashBoard</div>
         <div className="user-profile">
-          <span>Name</span>
+          <span>{user?.firstName || 'User'}</span>
           <div className="profile-picture"></div>
         </div>
       </header>
@@ -158,12 +153,16 @@ function Dashboard() {
       </div>
 
       <div className="dashboard-actions">
-        <button className="action-button"onClick={() => navigate('/add-item')}>Add Inventory</button>
-        <button className="action-button"onClick={() => navigate('/add-sale')}>Add Sales</button>
-        <button className="action-button"onClick={() => navigate('/balance-sheet')}>Generate Balance sheet</button>
+        <button className="action-button" onClick={() => navigate('/add-item')}>Add Inventory</button>
+        <button className="action-button" onClick={() => navigate('/add-sale')}>Add Sales</button>
+        <button className="action-button" onClick={() => navigate('/balance-sheet')}>Generate Balance Sheet</button>
       </div>
     </div>
   );
 }
+
+Dashboard.propTypes = {
+  toggleSidebar: PropTypes.func.isRequired,
+};
 
 export default Dashboard;
